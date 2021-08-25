@@ -1,0 +1,1 @@
+ curl -v POST --data @vmExample.json "http://localhost:8081/async_basic" --header "Content-Type:application/json"

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="fileExample" format="json">
+      <types:shape format="weave" example="fileExample.json"><![CDATA[%dw 2.0
+
+type fileExample = {|
+  fileName: String, 
+  customer: {|
+    customerId: String, 
+    customerName: String
+  |}
+|} {"example": "{\\\"fileName\\\":\\\"file1\\\",\\\"customer\\\":{\\\"customerId\\\":\\\"5\\\",\\\"customerName\\\":\\\"Rose\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#ebab686f-0568-4c31-90f0-7d44d1ddf361">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="fileExample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e3e7b9c5-63b6-4e89-921a-d86a248353d7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="fileExample"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

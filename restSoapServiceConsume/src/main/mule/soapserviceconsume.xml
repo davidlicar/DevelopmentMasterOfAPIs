@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0644eb57-dc40-42da-b19a-16816069d28d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="bf0988b5-7edd-49db-b193-c802c582f173" >
+		<wsc:connection wsdlLocation="https://w8cert.iconnectdata.com/CEWS/CEWS.wsdl" service="ContinuousEnrollmentService" port="ContinuousEnrollmentSoap11" address="https://w8cert.iconnectdata.com:443/CEWS/services" >
+			<wsc:custom-transport-configuration >
+				<wsc:default-http-transport-configuration timeout="#[30000]" />
+			</wsc:custom-transport-configuration>
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" >
+				<wsc:username-token-security-strategy username="CEWSAT123" password="q5rtP=dedv" />
+			</wsc:web-service-security>
+		</wsc:connection>
+	</wsc:config>
+	<os:object-store name="Object_store_client_os" doc:name="Object store" doc:id="117c843b-4ee0-4fa7-90c9-f601584dffb1" />
+	<os:object-store name="Object_store_token_os" doc:name="Object store" doc:id="0a96a4da-6229-47ca-bd11-8a75c6ef642d" />
+	<http:request-config name="HTTP_ComData_Payment_request" doc:name="HTTP Request configuration" doc:id="0ec7ec33-6602-4976-999f-1eaa00e2b942">
+		<http:request-connection protocol="HTTPS" host="cp-payments-eapi-qa.us-ea1-01.api.fleetcor.com"/>
+	</http:request-config>
+	<flow name="soapserviceconsumeFlow" doc:id="4fe6d571-f2fc-4e54-bc59-231a3f0b0fc2" >
+		<http:listener doc:name="Listener" doc:id="a3b56bce-d490-439f-a37b-e36c70a4308f" config-ref="HTTP_Listener_config" path="/{action}" outputMimeType="application/json" allowedMethods="POST"/>
+		<set-variable value="#[attributes.uriParams.action]" doc:name="Set Variable" doc:id="05129b2b-6230-476a-b131-605376b58fd4" variableName="action"/>
+		<choice doc:name="Choice" doc:id="27c9ec42-a88f-457d-a34c-4549da007e88" >
+			<when expression='#[vars.action=="soap"]'>
+				<ee:transform doc:name="Transform Message" doc:id="8ad4d984-52c9-47ff-b2d6-54a3a822747a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://ce.comdata.com/main/
+---
+{
+	ns0#addVendorsForCampaignRequest: {
+		custId: 'AGILE',
+		vendors: {
+			vendorNumber: 'V10082017001',
+			locationCode: 'LOC001',
+			vendorName: 'V10082017001',
+			dbaName: '?',
+			remitEmail: 'testvendor@test1vendor.com',
+			taxId: 'TAX001',
+			dunsNumber: '001',
+			projectedAnnualSpend: '1000000',
+			address1: '5305 MARYLAND WAY',
+			address2: 'STE 001',
+			city: 'BRENTWOOD',
+			state: 'TN',
+			zip: '?',
+			countryCode: 'USA',
+			vendorContactTitle: 'CONTROLLER',
+			vendorContactPrefix: 'MR',
+			vendorContactSuffix: 'ESQ',
+			vendorContactFirstName: 'JOHN',
+			vendorContactLastName: 'SMITH',
+			vendorContactEmailAddress: 'jsmith@testvendor.com',
+			vendorContactPhoneNumber: '6155558989',
+			terms: '30',
+			transactionCount: '5000',
+			currentPaymentMethod: 'CHECK',
+			responseCode: '?',
+			responseMessage: '?'
+		},
+		params: {
+			paramName: '?',
+			paramValue: {
+				"text()": "?"
+			}
+		}
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<wsc:consume doc:name="Consume" doc:id="bb21b8b8-e823-432a-8e35-0c10df03b8c2" config-ref="Web_Service_Consumer_Config" operation="addVendorsForCampaign"/>
+				<ee:transform doc:name="Transform Message" doc:id="9fb6c4fe-5e06-49f4-92ab-cc8ba9b4bb87" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.action=="rest"]'>
+				<ee:transform doc:name="Transform Message" doc:id="fdcbd6d4-6575-41ee-8606-67e67019b63b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "customer": {
+    "accountNumber": "AT123",
+    "id": "AGILE"
+  },
+  "cardHolderFirstName": "Kalyani",
+  "cardHolderLastName": "Chilaka",
+  "vendor": {
+    "number": "Kal1234",
+    "locationCode": "KC1234",
+    "address": {
+      "addressLine1": "123 Newcomb",
+      "addressLine2": "st",
+      "city": "franklin",
+      "state": "tn",
+      "country": "USA",
+      "zip": "12312"
+    },
+    "name": "KC1234",
+    "remitEmailTo": "kc@fleetcor.com",
+    "remitEmailCc": "kc@fleetcor.com",
+    "phone": "1234567890",
+    "fax": "1234567890",
+    "sendFaxRemittance": false,
+    "taxId": "123456789"
+  },
+    "paymentDate" : "03/23/2021",
+    "repairOrderNumber" : "8986",
+    "vehicleNumber" : "3826",
+    "promptedDriverId" : "0782",
+    "validateInvoiceData" : false,
+    "cardExpirationDate" : "0621",
+    "numberOfTransactions" : 7,
+    "mustBeExactAmountForAuth" : false,
+    "useGLCode1AsDefault" : false,
+    "mcc" : "0001",
+    "miscCost" : 1.67,
+    "totalLaborCost" : 10.00,
+    "totalPartsCost" : 15.00,
+    "totalTaxCost" : 10.37,
+    "warrantyPeriod" : "5998",
+    "warrantyReport" : true,
+  "controls": {
+    "airline": false,
+    "businessServices": false,
+    "carRentals": false,
+    "financialServices": false,
+    "fuel": false,
+    "hotels": false,
+    "legalAndInsurance": false,
+    "maintenance": false,
+    "Medical": false,
+    "misc": false,
+    "miscTransportation": false,
+    "restaurants": false
+  },
+  "invoice": [
+    {
+      "invoiceNumber" : "321321323",
+      "invoiceDate" : "03/22/2021",
+      "dueDate" : "08/15/2021",
+      "paymentNumber" : "001",
+      "invoiceComments" : "invoice comment",
+      "poNumber" : "7000",
+      "grossAmount" : 15.78,
+      "netAmount" : 24.78,
+      "discAmount" : 0.10,
+      "vcInvoiceNumber" : "VCINV001",
+      "glCode1" : "01.001.001.1002",
+      "glCodeAmount1" : 1.67,
+      "glCode2" : "01.001.002.1007",
+      "glCodeAmount2" : 4.11,
+      "glCode3" : "01.001.003.1003",
+      "glCodeAmount3" : 5.63,
+      "glCode4" : "01.001.004.1004",
+      "glCodeAmount4" : 3.37,
+      "subscriber": {
+        "firstName": "qwer",
+        "lastName": "qwer",
+        "phone": "1234567890",
+        "accountNumber": "asdf234",
+        "address": {
+          "addressLine1": "sdfrg",
+          "addressLine2": "adsf dsf",
+          "state": "ca",
+          "attention": "adf",
+          "company": "adf",
+          "mailMethod": "1",
+          "country": "adsf",
+          "zip": "12312",
+          "city": "ca"
+        }
+      }
+    }
+  ]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<http:request method="POST" doc:name="RestRequest" doc:id="1aef419a-9859-4f47-9e38-f8ee4a9935ef" config-ref="HTTP_ComData_Payment_request" path="/api/payments">
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : attributes.headers.Authorization
+}]]]></http:headers>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="a59f6fed-f3ea-4006-b704-13640332e2ea" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+
+				
+			</when>
+			<otherwise >
+				<raise-error doc:name="Raise error" doc:id="43676b7a-7121-43ae-89ef-bce77fff0400" type="CUSTOM:INVALID_OPERATION" description="OPERATION NOT SUPPORTED CURRENTLY"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

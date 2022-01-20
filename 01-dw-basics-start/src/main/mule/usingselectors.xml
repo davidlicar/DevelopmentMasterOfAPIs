@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="usingselectorsFlow" doc:id="ead41fe7-056e-4fe2-8c0f-54278241e2b4" >
+		<ee:transform doc:name="Transform Message" doc:id="b6d4131c-4ee7-4494-badb-bbb714ec826c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+fun getAllProductName(fileName:String) = 
+do {
+	var productsXml=readUrl(fileName,"application/xml")
+	var products=productsXml.products.*product
+	---
+	products.name
+}
+var productsXml=readUrl("classpath://examples/products.xml","application/xml")
+var products = productsXml.products.*product
+var myns=productsXml.products.#
+var obj={firstName:"David",lastName: "Linares"}
+
+---
+/*getAllProductName("classpath://examples/products.xml")*/
+/*Multivalue selector */
+//productsXml.products.*product
+/*Namespace Selector */
+//productsXml.products.#.uri
+/*myns#products:{
+    (products)
+	ids: products.@productId	
+	}	
+*/
+
+/*Select an attribute
+ * productsXml.products.*product.@productId
+ * 
+ */
+//sizeOf(productsXml..)
+//user:obj.&firstName
+//products.name11?
+/*Check the if exist */
+products[?($.brandName=='HP')]
+
+
+
+
+
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

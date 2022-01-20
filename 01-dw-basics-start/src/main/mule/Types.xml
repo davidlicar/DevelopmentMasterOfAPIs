@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="TypesFlow" doc:id="ec6df750-0aa9-428b-97bd-338e590e3c6e" >
+		<ee:transform doc:name="Transform Message" doc:id="9ce04785-43fa-4c03-8625-72d22365b81a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml encoding="UTF-8" 
+var timeNow= now() as Date
+type MyDateFormat = String  {format:"MM-dd"}
+ns myns http://www.way2learnonline.com/mytypes
+---
+{
+	myns#users:
+	{
+		user: "David" as CData,
+		age: 31 as CData,
+		today1: now(),
+    	today2: now() as Date,
+    	today3: now() as TimeZone,
+     	today4: now() as DateTime,
+     	today5: now() as LocalTime,     	
+     	today5: now() as LocalDateTime,     	     	
+     	today6: now() as MyDateFormat  		
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

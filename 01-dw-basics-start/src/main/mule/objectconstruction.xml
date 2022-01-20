@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="objectconstructionFlow" doc:id="7c3b7214-20c6-4104-b9f4-b484fbb4a189" >
+		<ee:transform doc:name="Transform Message" doc:id="139da1af-fe56-42c3-95c2-040c32323df6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var numbers= ["one","two",3]
+
+var object1={
+one: 1,
+two:2
+}
+var object2={
+ two:2,
+ three:3
+}
+var objarray=[
+	object1: object1,
+	object2: object2
+]
+output application/json
+---
+{
+	(objarray),(object1),four:4
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

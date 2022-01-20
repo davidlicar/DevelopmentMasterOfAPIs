@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="usingreduceFlow" doc:id="74324e59-d7f6-4c8e-879d-58da17ba27f4">
+		<ee:transform doc:name="Transform Message" doc:id="eb252902-637f-4536-a1c3-02c732c0a2d0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/dw
+var numbers= 1 to 6
+var nestedArray = [[1],[2,3],["hello"]]
+var objArray = [
+	{one:1},
+	{two:2,three:3}
+]
+var stringArray=["one","two","three","four","five"]
+
+fun myreducelogicfunc(element,acc) = acc*element
+---
+//reduce(numbers,(element,acc)-> acc+element)
+//reduce(numbers, myreducelogicfunc)
+//numbers reduce (element,acc=3) -> acc ++ element
+//numbers reduce (element,acc=3) -> element ++ acc
+//numbers reduce (element,acc=[]) -> acc + element
+//nestedArray reduce (element,acc=[]) -> acc ++ element
+//flatten(nestedArray)
+//objArray reduce (element,acc={}) -> acc ++ element
+//stringArray reduce (element,acc=[]) -> acc + element
+stringArray reduce (element,acc=0) -> acc + (if(sizeOf(element) > 3) 1 else 0)
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="usingreduceAdvance" doc:id="f8910eb2-dbe4-4ec7-b21d-9f8c9c3ba4e6" >
+		<ee:transform doc:name="Transform Message" doc:id="973a9734-6e17-4a43-94f0-f644899278da" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+var productsXml = readUrl("classpath://examples/products.xml","application/xml")
+var products=productsXml.products.*product
+
+fun getProductKpis(products)=
+
+products reduce (product,acc={
+hp: {price: 0, count: 0},
+ibm: {price: 0, count: 0},
+samsung: {price: 0, count: 0},
+apple: {price: 0, count: 0},
+motorola: {price: 0, count: 0}
+}) -> product.brandName match {
+	case bName  if (bName~="HP") -> acc - 'hp' ++ 'hp': {
+		price: acc[lower(bName)].price + product.originalPrice,		
+		count: acc.hp.count +1
+		}
+	case bName  if (bName~="Apple") -> acc - 'apple' ++ 'apple': {
+		price: acc[lower(bName)].price + product.originalPrice,		
+		count: acc.apple.count +1
+		}		
+	case bName  if (bName~="IBM") -> acc - 'ibm' ++ 'ibm': {
+		price: acc[lower(bName)].price + product.originalPrice,		
+		count: acc.ibm.count +1
+		}		
+	case bName  if (bName~="Samsung") -> acc - 'samsung' ++ 'samsung': {
+		price: acc[lower(bName)].price + product.originalPrice,		
+		count: acc.samsung.count +1
+		}				
+	case bName  if (bName~="Motorola") -> acc - 'motorola' ++ 'motorola': {
+		price: acc[lower(bName)].price + product.originalPrice,		
+		count: acc.motorola.count +1
+		}		
+	else -> acc
+}
+
+var productAverages=getProductKpis(products) mapObject (stats,productKey) -> {
+	(productKey): ((stats.price as Number)/(stats.count as Number)) as Number as String {format:"#,###.00"}
+}
+---
+products map (product) -> 
+product  ++ {
+	"AvgPrice" : productAverages[lower(product.brandName)]
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

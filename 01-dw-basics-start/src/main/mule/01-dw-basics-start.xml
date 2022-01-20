@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="01-dw-basics-startFlow" doc:id="4c32d7b9-15c3-49c9-98cc-6100bad0d385" >
+		<ee:transform doc:name="Transform Message" doc:id="734a54e6-fd5f-47fb-8b90-4a6d109c9c02" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+var numbers=["one","two",3]
+
+var object1={
+	one:1, 
+	two:2
+}
+var object2={
+	two:2,
+	three:3
+}
+var objArray=[
+	object1: object1,
+	object2: object2
+]
+---
+/*We need to wrap with parentesis
+ * {
+	(objArray)
+}*/
+
+/*join objects and array
+ * {
+	(objArray),(object1),four:4
+}*/
+
+/*agregating two arrays like two different elements
+numbers + numbers
+numbers + 4
+numbers + [4,5]
+*/
+
+/*	combining elements
+numbers ++ [4,5]
+*/
+/*
+ * aggregate an object to an array is possible
+numbers + object1
+ */
+ /*
+ * is not possible to combine an object to an array
+numbers ++ object1
+ */
+/*
+ * is not possible to agregate an object to an array
+numbers + object1
+ */
+
+/*The reverse agregate an array to an object is not possible
+object1 + numbers
+*/ 
+/*The reverse combine an array to an object is not possible
+object1 ++ numbers
+*/ 
+/*
+ * We cannot concatanete two objects
+ object1 + object2
+ */
+/* 
+ * its the same
+  object1 ++ object2 -"two"
+  object1 ++ (object2 -"two")
+ */
+ 
+/* 
+( object1 ++ object2 ) - "two"
+*/
+/*
+ * Refers to delete key:pair value
+(object1 ++ object2) -- "two":2
+*/
+/*
+ * Refers to delete key:pair value
+(object1 ++ object2) -- object1
+*/
+(object1 ++ object2) -- object1
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

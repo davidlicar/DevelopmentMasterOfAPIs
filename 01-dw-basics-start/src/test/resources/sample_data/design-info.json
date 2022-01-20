@@ -1,0 +1,10 @@
+{
+  "sampleData": {
+    "feb417a4-4896-47b7-9388-8c3884eda5b0": {
+      "payload": "sample_data/json.json"
+    },
+    "6ebda745-c349-4632-8116-74e8cac1bb63": {
+      "payload": "sample_data/products.xml"
+    }
+  }
+}

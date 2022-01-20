@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="usingarraysmoduleFlow" doc:id="118da077-cf56-433c-905d-f98b40815d9e" >
+		<ee:transform doc:name="Transform Message" doc:id="9553ed6b-2042-4f67-b464-baddd387efe8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+import dw::core::Arrays
+var productsXml = readUrl("classpath://examples/products.xml","application/xml")
+var products=productsXml.products.*product
+---
+/* products Arrays::some ($.originalPrice<5000) */
+/*  Arrays::some (products, (product) -> product.originalPrice < 5000) */
+/* Arrays::every (products, (product) -> product.originalPrice < 5000) */
+/* products.originalPrice Arrays::some ($>4000) */
+/*products Arrays::some ($.originalPrice < 5000) */
+/* Arrays::some (products, (product) -> product.originalPrice < 5000) */
+/* Arrays::every (products, (product) -> product.originalPrice < 5000) */
+/* products Arrays::countBy $.originalPrice <= 3000 */
+/* sizeOf(products) */
+/* products Arrays::sumBy $.originalPrice */
+/* products Arrays::sumBy if ($.originalPrice > 3000) $.originalPrice else 0 */
+/* products.originalPrice Arrays::divideBy(2) */ 
+flatten (products.originalPrice Arrays::divideBy(2))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="usingarraysmoduleFlow1" doc:id="418a5516-4016-4a80-8295-36b5b4a43947" >
+		<ee:transform doc:name="Transform Message" doc:id="c82f8a0c-ebe4-4e85-8588-1e5c43082e15" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+import dw::core::Objects
+var productsXml=readUrl("classpath://examples/productswithns.xml","application/xml")
+var products=productsXml.products.*product
+---
+/* Objects::nameSet(productsXml.products) */
+/* Objects::keySet(productsXml.products) map $.# */
+Objects::keySet(productsXml.products) map $.@]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
